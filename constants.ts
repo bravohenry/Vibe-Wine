@@ -145,6 +145,8 @@ export interface WineDream {
   grapes: string;
   profile: string;
   serve: string;
+  frontImageSrc: string; // Dream card front image (1-8)
+  imageSrc: string;
   isRed?: boolean; // For styling hints
 }
 
@@ -157,7 +159,9 @@ export const WINE_DREAMS: WineDream[] = [
     region: "France (Burgundy)",
     grapes: "Chardonnay (Blanc de Blancs)",
     profile: "Green apple, citrus, white flowers, toasted brioche/almond.",
-    serve: "6–8°C (43–46°F)"
+    serve: "6–8°C (43–46°F)",
+    frontImageSrc: "/dream/1.png",
+    imageSrc: "/wine/Veuve Ambal – Méthode Traditionnelle Blanc de Blancs, Brut.webp"
   },
   {
     id: 2,
@@ -167,7 +171,9 @@ export const WINE_DREAMS: WineDream[] = [
     region: "Unknown",
     grapes: "Riesling",
     profile: "Lime, green apple, white peach, high acidity.",
-    serve: "7–10°C (45–50°F)"
+    serve: "7–10°C (45–50°F)",
+    frontImageSrc: "/dream/2.png",
+    imageSrc: "/wine/FRITZ – Riesling.webp"
   },
   {
     id: 3,
@@ -177,7 +183,9 @@ export const WINE_DREAMS: WineDream[] = [
     region: "Italy (Friuli Venezia Giulia)",
     grapes: "Traminer / Gewürztraminer",
     profile: "Lychee, rose petal, tropical fruit, spice; very aromatic.",
-    serve: "8–10°C (46–50°F)"
+    serve: "8–10°C (46–50°F)",
+    frontImageSrc: "/dream/3.png",
+    imageSrc: "/wine/Puiatti – Traminer.webp"
   },
   {
     id: 4,
@@ -187,7 +195,9 @@ export const WINE_DREAMS: WineDream[] = [
     region: "France (Vin de Pays)",
     grapes: "Chardonnay + Sauvignon Blanc",
     profile: "Citrus, stone fruit, grassy/gooseberry notes, crisp finish.",
-    serve: "7–10°C (45–50°F)"
+    serve: "7–10°C (45–50°F)",
+    frontImageSrc: "/dream/4.png",
+    imageSrc: "/wine/C’est La Vie! – Chardonnay–Sauvignon (Récolte 2023).webp"
   },
   {
     id: 5,
@@ -197,7 +207,9 @@ export const WINE_DREAMS: WineDream[] = [
     region: "USA (California)",
     grapes: "Pinot Grigio",
     profile: "Lemon, pear, melon; light body, clean acidity.",
-    serve: "7–10°C (45–50°F)"
+    serve: "7–10°C (45–50°F)",
+    frontImageSrc: "/dream/5.png",
+    imageSrc: "/wine/Hayes Ranch – Pinot Grigio (California).webp"
   },
   {
     id: 6,
@@ -208,6 +220,8 @@ export const WINE_DREAMS: WineDream[] = [
     grapes: "Pinot Noir / Gamay",
     profile: "Red cherry, raspberry, light spice, softer tannin.",
     serve: "14–16°C (57–61°F)",
+    frontImageSrc: "/dream/6.png",
+    imageSrc: "/wine/Labouré-Roi – “Princesse …” Coteaux Bourguignons (2023).webp",
     isRed: true
   },
   {
@@ -219,6 +233,8 @@ export const WINE_DREAMS: WineDream[] = [
     grapes: "Pinot Noir + Syrah",
     profile: "Red fruit mixed with pepper & darker fruit notes.",
     serve: "14–16°C (57–61°F)",
+    frontImageSrc: "/dream/7.png",
+    imageSrc: "/wine/C’est La Vie! – Pinot Noir–Syrah (Récolte 2023).webp",
     isRed: true
   },
   {
@@ -230,6 +246,8 @@ export const WINE_DREAMS: WineDream[] = [
     grapes: "Montepulciano",
     profile: "Black cherry, plum, cocoa, dried herbs; firm but friendly.",
     serve: "16–18°C (61–64°F)",
+    frontImageSrc: "/dream/8.png",
+    imageSrc: "/wine/Masciarelli – Montepulciano d’Abruzzo DOC (2022).webp",
     isRed: true
   }
 ];

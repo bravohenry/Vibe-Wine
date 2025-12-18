@@ -1,58 +1,78 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import { SliderProps } from '../types';
-import { motion, useMotionValue, animate } from 'framer-motion';
+import { motion, useMotionValue, useTransform } from 'framer-motion';
 
 const MoodSlider: React.FC<SliderProps> = ({ value, onChange, min = 0, max = 100, theme }) => {
   const containerRef = useRef<HTMLDivElement>(null);
+  const thumbRef = useRef<HTMLDivElement>(null);
   
-  // We use useMotionValue for the visual thumb position to ensure 60fps updates
-  // without triggering React renders on every pixel moved during drag.
-  // However, since `value` is passed in from parent, we need to sync them.
-  const motionValue = useMotionValue(value);
+  // Thumb width is 48px (w-12), so center offset is 24px
+  const thumbRadius = 24;
 
+  // We use useMotionValue for the visual thumb position
+  const x = useMotionValue(0);
+  const [containerWidth, setContainerWidth] = useState(0);
+
+  // Sync motion value and container width
   useEffect(() => {
-    animate(motionValue, value, { duration: 0.1 });
-  }, [value, motionValue]);
+    const updateSize = () => {
+      if (containerRef.current) {
+        const width = containerRef.current.offsetWidth;
+        setContainerWidth(width);
+        const initialX = ((value - min) / (max - min)) * width;
+        x.set(initialX);
+      }
+    };
 
-  // Calculate value from X coordinate
-  const getValueFromX = (clientX: number) => {
-    if (!containerRef.current) return min;
+    updateSize();
+    window.addEventListener('resize', updateSize);
+    return () => window.removeEventListener('resize', updateSize);
+  }, []); // Only on mount/unmount
+
+  // Sync motion value with prop value when it changes from outside
+  useEffect(() => {
+    if (containerWidth > 0) {
+      const targetX = ((value - min) / (max - min)) * containerWidth;
+      // Only set if not already close (avoids jitter during drag)
+      if (Math.abs(x.get() - targetX) > 1) {
+        x.set(targetX);
+      }
+    }
+  }, [value, min, max, containerWidth]);
+
+  // Update parent state on drag
+  const handleDrag = () => {
+    if (containerWidth > 0) {
+      const currentX = x.get();
+      const newPercent = Math.max(0, Math.min(1, currentX / containerWidth));
+      const newValue = Math.round(min + newPercent * (max - min));
+      if (newValue !== value) {
+        onChange(newValue);
+      }
+    }
+  };
+
+  // Handle track click or tap
+  const handlePointerDown = (e: React.PointerEvent) => {
+    if (!containerRef.current) return;
+    
+    // If clicking directly on the thumb, let Framer Motion handle it
+    if (e.target === thumbRef.current || thumbRef.current?.contains(e.target as Node)) {
+      return;
+    }
+
     const rect = containerRef.current.getBoundingClientRect();
-    const width = rect.width;
-    const offsetX = clientX - rect.left;
+    const offsetX = Math.max(0, Math.min(rect.width, e.clientX - rect.left));
+    const newPercent = offsetX / rect.width;
+    const newValue = Math.round(min + newPercent * (max - min));
     
-    // Clamp between 0 and 1
-    let percent = offsetX / width;
-    percent = Math.max(0, Math.min(1, percent));
-    
-    return Math.round(min + percent * (max - min));
-  };
-
-  const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
-    // Prevent default browser behavior (text selection, scrolling on touch)
-    e.preventDefault();
-    
-    // Calculate initial value on click/tap
-    const newValue = getValueFromX(e.clientX);
+    // Set position and trigger change
+    x.set(offsetX);
     onChange(newValue);
-
-    // Setup global listeners to track movement outside the container
-    const handlePointerMove = (moveEvent: PointerEvent) => {
-      const val = getValueFromX(moveEvent.clientX);
-      onChange(val);
-    };
-
-    const handlePointerUp = () => {
-      window.removeEventListener('pointermove', handlePointerMove);
-      window.removeEventListener('pointerup', handlePointerUp);
-    };
-
-    window.addEventListener('pointermove', handlePointerMove);
-    window.addEventListener('pointerup', handlePointerUp);
   };
 
-  // Convert current value to percentage for CSS positioning
-  const percent = ((value - min) / (max - min)) * 100;
+  // Fill width derived from x
+  const fillWidth = useTransform(x, [0, containerWidth || 1], ["0%", "100%"]);
 
   return (
     <div className="w-full max-w-md mx-auto relative px-4 select-none touch-none">
@@ -75,24 +95,24 @@ const MoodSlider: React.FC<SliderProps> = ({ value, onChange, min = 0, max = 100
         }}
       >
           {/* Active Fill */}
-          <div 
-            className="absolute left-0 top-0 bottom-0 rounded-full opacity-20 transition-all duration-100 ease-linear"
-            style={{ width: `${percent}%`, backgroundColor: theme.color }}
+          <motion.div 
+            className="absolute left-0 top-0 bottom-0 rounded-full opacity-20"
+            style={{ width: fillWidth, backgroundColor: theme.color }}
           />
 
           {/* Thumb */}
-          {/* We remove Framer Motion's 'drag' prop to avoid conflict. 
-              We position it absolutely based on the value. */}
           <motion.div
-            className="absolute w-12 h-12 rounded-full bg-white shadow-lg flex items-center justify-center z-10 pointer-events-none"
-            style={{ 
-                left: `calc(${percent}% - 24px)`, // Center thumb (width/2)
-                boxShadow: '0 4px 12px rgba(0,0,0,0.15)'
-            }}
+            ref={thumbRef}
+            drag="x"
+            dragConstraints={{ left: 0, right: containerWidth }}
+            dragElastic={0}
+            dragMomentum={false}
+            onDrag={handleDrag}
+            style={{ x, left: -thumbRadius }}
+            className="absolute w-12 h-12 rounded-full bg-white shadow-lg flex items-center justify-center z-10"
             whileHover={{ scale: 1.1 }}
-            // We use a small layout animation for smooth snapping if clicked, 
-            // but short enough to feel responsive during drag.
-            transition={{ type: "tween", duration: 0.05 }}
+            whileTap={{ scale: 0.95 }}
+            transition={{ type: "spring", stiffness: 600, damping: 40 }}
           >
               <div className="w-1.5 h-1.5 rounded-full bg-slate-300" />
           </motion.div>

@@ -148,7 +148,7 @@ const MoodShape: React.FC<MoodShapeProps> = ({ theme }) => {
           fill="url(#glassBody)"
           stroke="url(#rimLight)"
           strokeWidth="2" // Thicker rim for definition
-          className="backdrop-blur-sm"
+          className="backdrop-blur-[2px]"
           style={{ filter: 'url(#glossFilter)' }}
         />
         {/* Inner shadow/inset effect simulation via overlay stroke */}
@@ -167,7 +167,7 @@ const MoodShape: React.FC<MoodShapeProps> = ({ theme }) => {
           fill="url(#glassBody)"
           stroke="url(#rimLight)"
           strokeWidth="2"
-          className="backdrop-blur-[6px]"
+          className="backdrop-blur-[4px]"
           style={{ filter: 'url(#glossFilter)' }}
         />
 
@@ -177,7 +177,7 @@ const MoodShape: React.FC<MoodShapeProps> = ({ theme }) => {
           fill="url(#glassBody)"
           stroke="url(#rimLight)"
           strokeWidth="1.5"
-          className="backdrop-blur-md"
+          className="backdrop-blur-[8px]"
           style={{ filter: 'url(#glossFilter)' }}
         />
 

@@ -1,31 +1,59 @@
-import React, { useRef, useLayoutEffect } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
-import { WINE_DREAMS } from '../constants';
+import { WINE_DREAMS, WineDream } from '../constants';
 import { MoodTheme } from '../types';
 import TarotCard from './TarotCard';
 
 interface DreamSelectionProps {
   theme: MoodTheme;
   onBack: () => void;
+  onDrink: (wine: WineDream) => void;
 }
 
-const DreamSelection: React.FC<DreamSelectionProps> = ({ theme, onBack }) => {
-  const scrollRef = useRef<HTMLDivElement>(null);
-  
-  // Create 5 copies of the data to simulate "infinite" scrolling.
-  // This gives the user plenty of room to scroll left/right before hitting an edge.
-  const items = [...WINE_DREAMS, ...WINE_DREAMS, ...WINE_DREAMS, ...WINE_DREAMS, ...WINE_DREAMS];
+const DreamSelection: React.FC<DreamSelectionProps> = ({ theme, onBack, onDrink }) => {
+  // Only render the original 8 items (no "infinite" duplication).
+  const items = WINE_DREAMS;
+  const carouselRef = useRef<HTMLDivElement | null>(null);
+  const [revealedWine, setRevealedWine] = useState<WineDream | null>(null);
 
-  useLayoutEffect(() => {
-    if (scrollRef.current) {
-        const scrollContainer = scrollRef.current;
-        const scrollWidth = scrollContainer.scrollWidth;
-        const clientWidth = scrollContainer.clientWidth;
-        
-        // Center the scroll view initially on the middle set of cards
-        // This makes the list feel infinite immediately on load.
-        scrollContainer.scrollLeft = (scrollWidth / 2) - (clientWidth / 2);
-    }
+  useEffect(() => {
+    const carousel = carouselRef.current;
+    if (!carousel) return;
+
+    const firstCard = carousel.querySelector<HTMLElement>('[data-dream-card="0"]');
+    if (!firstCard) return;
+
+    // Centering the first snap item requires enough left/right padding.
+    // We compute dynamic padding so the first/last item can sit in the center.
+    // English comment required by user rule.
+    const applyEdgePaddingAndCenterFirst = () => {
+      const styles = window.getComputedStyle(carousel);
+      const basePaddingLeft = Number.parseFloat(styles.paddingLeft || '0') || 0;
+      const basePaddingRight = Number.parseFloat(styles.paddingRight || '0') || 0;
+
+      const requiredEdgePadding = Math.max(
+        0,
+        (carousel.clientWidth - firstCard.clientWidth) / 2
+      );
+
+      const nextPaddingLeft = Math.max(basePaddingLeft, requiredEdgePadding);
+      const nextPaddingRight = Math.max(basePaddingRight, requiredEdgePadding);
+
+      carousel.style.paddingLeft = `${Math.round(nextPaddingLeft)}px`;
+      carousel.style.paddingRight = `${Math.round(nextPaddingRight)}px`;
+
+      // Snap/scroll to center the first card.
+      firstCard.scrollIntoView({ behavior: 'auto', inline: 'center', block: 'nearest' });
+    };
+
+    // Wait a frame so layout (including font loading) has settled.
+    const raf = requestAnimationFrame(applyEdgePaddingAndCenterFirst);
+    window.addEventListener('resize', applyEdgePaddingAndCenterFirst);
+
+    return () => {
+      cancelAnimationFrame(raf);
+      window.removeEventListener('resize', applyEdgePaddingAndCenterFirst);
+    };
   }, []);
 
   return (
@@ -52,8 +80,8 @@ const DreamSelection: React.FC<DreamSelectionProps> = ({ theme, onBack }) => {
 
       {/* Horizontal Carousel Container */}
       <div 
-        ref={scrollRef}
-        className="flex-1 flex items-center overflow-x-auto snap-x snap-mandatory gap-8 px-[50vw] py-12 hide-scrollbar touch-pan-x"
+        ref={carouselRef}
+        className="flex-1 flex items-center overflow-x-auto snap-x snap-mandatory gap-8 px-6 md:px-12 pt-12 pb-28 hide-scrollbar touch-pan-x"
         style={{ 
              // Hide native scrollbars for a cleaner look
              scrollbarWidth: 'none', 
@@ -62,13 +90,14 @@ const DreamSelection: React.FC<DreamSelectionProps> = ({ theme, onBack }) => {
       >
         {items.map((dream, index) => (
             <motion.div 
-                key={`${dream.id}-${index}`}
+                key={dream.id}
+                data-dream-card={index}
                 className="snap-center flex-shrink-0 flex flex-col items-center group/item"
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ 
                     // Stagger entrance slightly based on original index
-                    delay: 0.1 + (index % WINE_DREAMS.length) * 0.05, 
+                    delay: 0.1 + index * 0.05, 
                     duration: 0.5 
                 }}
                 whileHover={{ 
@@ -80,14 +109,16 @@ const DreamSelection: React.FC<DreamSelectionProps> = ({ theme, onBack }) => {
             >
                 {/* Card Container - Holds dimensions and perspective */}
                 <div className="w-72 md:w-80 lg:w-[320px] aspect-[2/3] perspective-1000 relative">
-                     <TarotCard data={dream} theme={theme} index={index} />
+                     <TarotCard
+                        data={dream}
+                        theme={theme}
+                        index={index}
+                        onReveal={(wine) => setRevealedWine(wine)}
+                      />
                 </div>
                 
                 {/* Name/Label Below */}
                 <div className="mt-6 text-center transition-all duration-300 transform group-hover/item:translate-y-2">
-                    <h3 className="text-lg font-bold text-slate-800 tracking-widest uppercase font-serif drop-shadow-sm" style={{ fontFamily: 'Manrope' }}>
-                        {dream.dreamTitle}
-                    </h3>
                     <div className="flex items-center justify-center gap-2 mt-2 opacity-60">
                         <span className="w-1 h-1 rounded-full bg-slate-400" />
                         <p className="text-xs text-slate-600 font-medium uppercase tracking-wider">
@@ -103,6 +134,37 @@ const DreamSelection: React.FC<DreamSelectionProps> = ({ theme, onBack }) => {
       {/* Edge Fade Masks */}
       <div className="absolute inset-y-0 left-0 w-32 bg-gradient-to-r from-white/20 to-transparent pointer-events-none z-10 backdrop-blur-[1px]" />
       <div className="absolute inset-y-0 right-0 w-32 bg-gradient-to-l from-white/20 to-transparent pointer-events-none z-10 backdrop-blur-[1px]" />
+
+      {/* Bottom CTA (appears after reveal) */}
+      <motion.div
+        initial={false}
+        animate={{
+          y: revealedWine ? 0 : 120,
+          opacity: revealedWine ? 1 : 0,
+        }}
+        transition={{ type: 'spring', stiffness: 260, damping: 28 }}
+        className="fixed left-0 right-0 bottom-0 z-30 px-6 pb-6 pt-3 pointer-events-none"
+      >
+        <div className="mx-auto w-full max-w-sm pointer-events-auto">
+          <motion.button
+            type="button"
+            disabled={!revealedWine}
+            onClick={() => {
+              if (!revealedWine) return;
+              onDrink(revealedWine);
+            }}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            className="w-full py-4 rounded-full text-white font-semibold text-lg shadow-xl transition-colors duration-300 disabled:opacity-60"
+            style={{
+              backgroundColor: theme.color,
+              boxShadow: `0 10px 25px -5px ${theme.color}80`,
+            }}
+          >
+            Drink with My Mood
+          </motion.button>
+        </div>
+      </motion.div>
 
       {/* Global Style for hiding scrollbar */}
       <style>{`

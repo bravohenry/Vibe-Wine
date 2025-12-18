@@ -3,35 +3,35 @@ import { motion } from 'framer-motion';
 import { WineDream } from '../constants';
 import { MoodTheme } from '../types';
 
-// Using direct paths instead of imports to avoid module resolution issues
-// in environments that don't support importing image files directly.
-const wineImages: Record<number, string> = {
-  1: '/components/wine/1.jpg',
-  2: '/components/wine/2.jpg',
-  3: '/components/wine/3.jpg',
-  4: '/components/wine/4.jpg',
-  5: '/components/wine/5.jpg',
-  6: '/components/wine/6.jpg',
-  7: '/components/wine/7.jpg',
-  8: '/components/wine/8.jpg',
-};
-
 interface TarotCardProps {
   data: WineDream;
   theme: MoodTheme;
   index: number;
+  onReveal: (wine: WineDream) => void;
 }
 
-const TarotCard: React.FC<TarotCardProps> = ({ data, theme, index }) => {
+const TarotCard: React.FC<TarotCardProps> = ({ data, theme, index, onReveal }) => {
   const [isFlipped, setIsFlipped] = useState(false);
 
-  // Use the image path, fallback to placeholder if not found
-  const imageSrc = wineImages[data.id] || `https://placehold.co/600x900/${data.isRed ? '4a1d1d' : 'e8f4f8'}/${data.isRed ? 'e8f4f8' : '2d2d2d'}?text=${encodeURIComponent(data.name)}`;
+  // Use the dream front image (1-8). This is the "tarot" face the user selects.
+  const frontImageSrc = data.frontImageSrc || `https://placehold.co/600x900/ffffff/2d2d2d?text=${encodeURIComponent(data.dreamTitle)}`;
+
+  // Use the image URL provided by the data source.
+  // Fallback to placeholder if somehow missing.
+  const imageSrc =
+    data.imageSrc ||
+    `https://placehold.co/600x900/${data.isRed ? '4a1d1d' : 'e8f4f8'}/${data.isRed ? 'e8f4f8' : '2d2d2d'}?text=${encodeURIComponent(data.name)}`;
 
   return (
     <div 
         className="w-full h-full relative group cursor-pointer" 
-        onClick={() => setIsFlipped(!isFlipped)}
+        onClick={() => {
+          setIsFlipped((prev) => {
+            const next = !prev;
+            if (next) onReveal(data);
+            return next;
+          });
+        }}
     >
       <motion.div
         className="w-full h-full relative preserve-3d"
@@ -46,7 +46,7 @@ const TarotCard: React.FC<TarotCardProps> = ({ data, theme, index }) => {
             style={{ 
                 // Glassy look with dynamic mood tint
                 background: `linear-gradient(135deg, rgba(255,255,255,0.6) 0%, rgba(255,255,255,0.2) 100%)`,
-                backdropFilter: 'blur(20px)',
+                backdropFilter: 'blur(6px)',
                 boxShadow: `0 20px 40px -10px ${theme.color}40, inset 0 0 0 1px rgba(255,255,255,0.4)`
             }}
         >
@@ -64,19 +64,27 @@ const TarotCard: React.FC<TarotCardProps> = ({ data, theme, index }) => {
                 }}
             />
             
-            {/* Card Content */}
-            <div className="absolute inset-4 border border-white/30 rounded-2xl flex flex-col items-center justify-center p-4 text-center">
-                 {/* Abstract geometric symbol */}
-                 <div 
-                    className="w-20 h-20 rounded-full blur-xl mb-8 opacity-70"
-                    style={{ backgroundColor: theme.accentColor }} 
-                 />
-                 <h3 className="text-2xl font-bold text-slate-700 tracking-widest uppercase mb-3" style={{ fontFamily: 'Manrope' }}>
-                     {data.dreamTitle}
-                 </h3>
-                 <span className="text-xs text-slate-500 font-medium tracking-wide uppercase opacity-70">
-                    Tap to reveal
-                 </span>
+            {/* Dream Front Image */}
+            <div className="absolute inset-0 p-4 flex items-center justify-center">
+                <div className="absolute inset-4 border border-white/30 rounded-2xl overflow-hidden">
+                    <img
+                        src={frontImageSrc}
+                        alt={data.dreamTitle}
+                        className="w-full h-full object-cover object-center"
+                    />
+                    {/* Subtle readability overlay for title */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
+                </div>
+
+                {/* Title + hint */}
+                <div className="absolute bottom-8 left-8 right-8 text-center">
+                    <h3 className="text-2xl font-bold text-white tracking-widest uppercase mb-2 drop-shadow-md" style={{ fontFamily: 'Manrope' }}>
+                        {data.dreamTitle}
+                    </h3>
+                    <span className="text-xs text-white/80 font-medium tracking-wide uppercase">
+                        Tap to reveal
+                    </span>
+                </div>
             </div>
         </div>
 
@@ -91,11 +99,11 @@ const TarotCard: React.FC<TarotCardProps> = ({ data, theme, index }) => {
              {/* 
                 IMAGE SECTION - Top 70% (Increased for vertical photos)
              */}
-             <div className="relative h-[70%] w-full bg-slate-100 overflow-hidden group-hover:h-[72%] transition-all duration-500">
+             <div className="relative h-[70%] w-full bg-white overflow-hidden group-hover:h-[72%] transition-all duration-500 p-4 flex items-center justify-center">
                 <img 
                     src={imageSrc} 
                     alt={data.name} 
-                    className="w-full h-full object-cover object-center transition-transform duration-1000 group-hover:scale-105"
+                    className="w-full h-full object-contain object-center transition-transform duration-500 bg-white"
                 />
                 
                 {/* Gradient Gradient for Text Readability - slightly taller to accommodate white text on varied backgrounds */}
@@ -112,7 +120,7 @@ const TarotCard: React.FC<TarotCardProps> = ({ data, theme, index }) => {
                 </div>
 
                 {/* Badge (Type) */}
-                <div className="absolute top-4 right-4 px-3 py-1 bg-white/20 backdrop-blur-md rounded-full text-[10px] font-bold tracking-wider text-white border border-white/30 shadow-sm">
+                <div className="absolute top-4 right-4 px-3 py-1 bg-[#333]/20 backdrop-blur-md rounded-full text-[10px] font-bold tracking-wider text-white shadow-sm">
                     {data.type.split(' ')[0]}
                 </div>
              </div>

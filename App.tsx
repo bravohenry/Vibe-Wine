@@ -4,11 +4,14 @@ import MoodShape from './components/MoodShape';
 import MoodSlider from './components/MoodSlider';
 import DreamSelection from './components/DreamSelection';
 import { motion, AnimatePresence } from 'framer-motion';
+import InteractionPage from './components/InteractionPage';
+import { WineDream } from './constants';
 
 const App: React.FC = () => {
   // 65 maps to 'Pleasant'
   const [moodValue, setMoodValue] = useState(65);
-  const [step, setStep] = useState<'mood' | 'dreams'>('mood');
+  const [step, setStep] = useState<'mood' | 'dreams' | 'interaction'>('mood');
+  const [selectedWine, setSelectedWine] = useState<WineDream | null>(null);
   
   const theme = getMoodTheme(moodValue);
 
@@ -99,7 +102,7 @@ const App: React.FC = () => {
                     </div>
                 </footer>
             </motion.div>
-        ) : (
+        ) : step === 'dreams' ? (
             <motion.div
                 key="dreams-screen"
                 initial={{ opacity: 0, y: 20 }}
@@ -108,7 +111,41 @@ const App: React.FC = () => {
                 transition={{ duration: 0.5 }}
                 className="flex-1 w-full py-8"
             >
-                <DreamSelection theme={theme} onBack={() => setStep('mood')} />
+                <DreamSelection
+                  theme={theme}
+                  onBack={() => setStep('mood')}
+                  onDrink={(wine) => {
+                    setSelectedWine(wine);
+                    setStep('interaction');
+                  }}
+                />
+            </motion.div>
+        ) : (
+            <motion.div
+                key="interaction-screen"
+                initial={{ opacity: 0, y: 18 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 18, filter: 'blur(8px)' }}
+                transition={{ duration: 0.5 }}
+                className="flex-1 w-full py-6"
+            >
+                {selectedWine ? (
+                  <InteractionPage
+                    theme={theme}
+                    moodValue={moodValue}
+                    wine={selectedWine}
+                    onBack={() => setStep('dreams')}
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center">
+                    <button
+                      onClick={() => setStep('dreams')}
+                      className="text-sm font-semibold text-slate-700 hover:text-slate-900 transition-colors bg-white/40 backdrop-blur-md px-5 py-3 rounded-full shadow-sm hover:bg-white/60"
+                    >
+                      Back
+                    </button>
+                  </div>
+                )}
             </motion.div>
         )}
       </AnimatePresence>

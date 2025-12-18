@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Mindful State</title>
+    <title>Vibe &amp; Wine</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
       @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap');
@@ -14,6 +14,22 @@
         padding: 0;
         overflow: hidden; /* Prevent scrolling on the main page */
         -webkit-font-smoothing: antialiased;
+      }
+
+      /* --- 3D card flip utilities (Tailwind CDN doesn't include these) --- */
+      /* Keep comments in English per repo conventions. */
+      .perspective-1000 {
+        perspective: 1000px;
+      }
+
+      .preserve-3d {
+        transform-style: preserve-3d;
+        -webkit-transform-style: preserve-3d;
+      }
+
+      .backface-hidden {
+        backface-visibility: hidden;
+        -webkit-backface-visibility: hidden;
       }
       
       /* Custom slider styling for range input */
