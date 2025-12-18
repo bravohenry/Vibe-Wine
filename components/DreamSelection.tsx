@@ -64,24 +64,55 @@ const DreamSelection: React.FC<DreamSelectionProps> = ({ theme, onBack, onDrink 
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.2 }}
-        className="flex items-center justify-between px-6 py-4 flex-shrink-0 relative z-20"
+        className="w-full pt-8 sm:pt-12 pb-3 sm:pb-4 flex-shrink-0 relative z-20 px-4 sm:px-6 md:px-10"
       >
-        <button 
-            onClick={onBack}
-            className="text-sm font-semibold text-slate-600 hover:text-slate-900 transition-colors flex items-center gap-1 bg-white/30 backdrop-blur-md px-4 py-2 rounded-full shadow-sm hover:bg-white/50"
-        >
-            ← Back
-        </button>
-        <h2 className="text-xl md:text-2xl font-bold text-slate-800 drop-shadow-sm">
-            Choose a Dream
-        </h2>
-        <div className="w-20" /> {/* Spacer to balance the back button */}
+        <div className="w-full max-w-3xl mx-auto flex items-center justify-between">
+          <button 
+              onClick={onBack}
+              className="text-sm font-semibold text-white hover:text-white/90 transition-all duration-300 ease-out flex items-center gap-1 px-4 py-2 rounded-full border-[0.5px] border-transparent hover:border-transparent hover:scale-[1.02] active:scale-[0.98]"
+              style={{
+                // Back button: solid black background, no gradient.
+                // English comment required by user rule.
+                backgroundColor: 'rgba(0, 0, 0, 1)',
+                backgroundImage: 'none',
+                background: 'none',
+                borderColor: 'rgba(0, 0, 0, 0)',
+                borderImage: 'none',
+                backdropFilter: 'blur(20px) saturate(180%)',
+                WebkitBackdropFilter: 'blur(20px) saturate(180%)',
+                boxShadow: `
+                  inset 0 1px 1px rgba(255,255,255,0.8),
+                  inset 0 -1px 1px rgba(255,255,255,0.2),
+                  0 2px 8px rgba(0,0,0,0.04),
+                  0 4px 16px rgba(0,0,0,0.04)
+                `,
+              }}
+          >
+              <span className="text-base leading-none mr-1">&lt;</span> Back
+          </button>
+
+          <h2 className="text-xl md:text-2xl font-bold text-slate-800 drop-shadow-sm text-center">
+              Choose a Dream
+          </h2>
+
+          {/* Mirror the back button width so the title stays centered */}
+          <div className="opacity-0 pointer-events-none select-none">
+            <button
+              className="text-sm font-semibold text-white flex items-center gap-1 px-4 py-2 rounded-full border-[0.5px] border-transparent"
+              style={{ background: 'none' }}
+              tabIndex={-1}
+              aria-hidden="true"
+            >
+              <span className="text-base leading-none mr-1">&lt;</span> Back
+            </button>
+          </div>
+        </div>
       </motion.div>
 
       {/* Horizontal Carousel Container */}
       <div 
         ref={carouselRef}
-        className="flex-1 flex items-center overflow-x-auto snap-x snap-mandatory gap-8 px-6 md:px-12 pt-12 pb-28 hide-scrollbar touch-pan-x"
+        className="flex-1 flex items-center overflow-x-auto snap-x snap-mandatory gap-6 sm:gap-8 px-4 sm:px-6 md:px-12 pt-8 sm:pt-12 pb-28 hide-scrollbar touch-pan-x"
         style={{ 
              // Hide native scrollbars for a cleaner look
              scrollbarWidth: 'none', 
@@ -143,9 +174,9 @@ const DreamSelection: React.FC<DreamSelectionProps> = ({ theme, onBack, onDrink 
           opacity: revealedWine ? 1 : 0,
         }}
         transition={{ type: 'spring', stiffness: 260, damping: 28 }}
-        className="fixed left-0 right-0 bottom-0 z-30 px-6 pb-6 pt-3 pointer-events-none"
+        className="fixed left-0 right-0 bottom-0 z-30 px-4 sm:px-6 pb-6 pt-3 pointer-events-none"
       >
-        <div className="mx-auto w-full max-w-sm pointer-events-auto">
+        <div className="mx-auto w-full max-w-sm pointer-events-auto safe-bottom">
           <motion.button
             type="button"
             disabled={!revealedWine}
@@ -155,10 +186,17 @@ const DreamSelection: React.FC<DreamSelectionProps> = ({ theme, onBack, onDrink 
             }}
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
-            className="w-full py-4 rounded-full text-white font-semibold text-lg shadow-xl transition-colors duration-300 disabled:opacity-60"
+            className="w-full py-4 rounded-full text-white font-semibold text-lg transition-all duration-300 disabled:opacity-60 border border-white/30"
             style={{
-              backgroundColor: theme.color,
-              boxShadow: `0 10px 25px -5px ${theme.color}80`,
+              background: `linear-gradient(to bottom, ${theme.color}, ${theme.color}dd)`,
+              backdropFilter: 'blur(12px) saturate(150%)',
+              WebkitBackdropFilter: 'blur(12px) saturate(150%)',
+              boxShadow: `
+                inset 0 1px 1px rgba(255,255,255,0.35),
+                inset 0 -1px 2px rgba(0,0,0,0.1),
+                0 8px 24px -4px ${theme.color}60,
+                0 4px 12px -2px ${theme.color}40
+              `,
             }}
           >
             Drink with My Mood

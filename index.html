@@ -16,8 +16,27 @@
         font-family: 'Manrope', sans-serif;
         margin: 0;
         padding: 0;
-        overflow: hidden; /* Prevent scrolling on the main page */
+        /* Allow vertical scrolling on small screens while preventing horizontal overflow. */
+        /* English comment required by user rule. */
+        overflow-x: hidden;
+        overflow-y: auto;
         -webkit-font-smoothing: antialiased;
+      }
+
+      html, body, #root {
+        height: 100%;
+      }
+
+      /* Better viewport handling on mobile browsers (esp. iOS Safari). */
+      /* English comment required by user rule. */
+      #root {
+        min-height: 100dvh;
+      }
+
+      /* Utility: safe-area padding helpers for iOS home indicator. */
+      /* English comment required by user rule. */
+      .safe-bottom {
+        padding-bottom: env(safe-area-inset-bottom);
       }
 
       /* --- 3D card flip utilities (Tailwind CDN doesn't include these) --- */

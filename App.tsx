@@ -57,7 +57,7 @@ const App: React.FC = () => {
 
                 {/* Centerpiece: The Mood Shape */}
                 <main className="relative z-10 flex-1 flex flex-col items-center justify-center w-full">
-                    <div className="scale-75 sm:scale-100 md:scale-125 transition-transform duration-500">
+                    <div className="scale-[0.62] sm:scale-75 md:scale-100 lg:scale-125 transition-transform duration-500">
                         <MoodShape theme={theme} />
                     </div>
 
@@ -91,10 +91,17 @@ const App: React.FC = () => {
                             onClick={() => setStep('dreams')}
                             whileHover={{ scale: 1.02 }}
                             whileTap={{ scale: 0.98 }}
-                            className="w-full max-w-sm py-4 rounded-full text-white font-semibold text-lg shadow-xl transition-colors duration-300"
+                            className="w-full max-w-sm py-4 rounded-full text-white font-semibold text-lg transition-all duration-300 border border-white/30"
                             style={{ 
-                                backgroundColor: theme.color,
-                                boxShadow: `0 10px 25px -5px ${theme.color}80` 
+                                background: `linear-gradient(to bottom, ${theme.color}, ${theme.color}dd)`,
+                                backdropFilter: 'blur(12px) saturate(150%)',
+                                WebkitBackdropFilter: 'blur(12px) saturate(150%)',
+                                boxShadow: `
+                                  inset 0 1px 1px rgba(255,255,255,0.35),
+                                  inset 0 -1px 2px rgba(0,0,0,0.1),
+                                  0 8px 24px -4px ${theme.color}60,
+                                  0 4px 12px -2px ${theme.color}40
+                                `,
                             }}
                         >
                             Next
@@ -109,7 +116,7 @@ const App: React.FC = () => {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: 20 }}
                 transition={{ duration: 0.5 }}
-                className="flex-1 w-full py-8"
+                className="flex-1 w-full"
             >
                 <DreamSelection
                   theme={theme}
@@ -140,7 +147,24 @@ const App: React.FC = () => {
                   <div className="w-full h-full flex items-center justify-center">
                     <button
                       onClick={() => setStep('dreams')}
-                      className="text-sm font-semibold text-slate-700 hover:text-slate-900 transition-colors bg-white/40 backdrop-blur-md px-5 py-3 rounded-full shadow-sm hover:bg-white/60"
+                      className="text-sm font-semibold text-white hover:text-white/90 transition-all duration-300 ease-out px-5 py-3 rounded-full border-[0.5px] border-transparent hover:border-transparent hover:scale-[1.02] active:scale-[0.98]"
+                      style={{
+                        // Back button: solid black background, no gradient.
+                        // English comment required by user rule.
+                        backgroundColor: 'rgba(0, 0, 0, 1)',
+                        backgroundImage: 'none',
+                        background: 'none',
+                        borderColor: 'rgba(0, 0, 0, 0)',
+                        borderImage: 'none',
+                        backdropFilter: 'blur(20px) saturate(180%)',
+                        WebkitBackdropFilter: 'blur(20px) saturate(180%)',
+                        boxShadow: `
+                          inset 0 1px 1px rgba(255,255,255,0.8),
+                          inset 0 -1px 1px rgba(255,255,255,0.2),
+                          0 2px 8px rgba(0,0,0,0.04),
+                          0 4px 16px rgba(0,0,0,0.04)
+                        `,
+                      }}
                     >
                       Back
                     </button>

@@ -9,9 +9,11 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@callstack/liquid-glass": "^0.7.0",
+    "framer-motion": "^12.23.26",
+    "liquid-glass-react": "^1.1.1",
     "react": "^19.2.3",
-    "react-dom": "^19.2.3",
-    "framer-motion": "^12.23.26"
+    "react-dom": "^19.2.3"
   },
   "devDependencies": {
     "@types/node": "^22.14.0",

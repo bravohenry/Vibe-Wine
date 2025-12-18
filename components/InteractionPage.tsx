@@ -463,9 +463,9 @@ function Stamp({
   const mask = `radial-gradient(${scallopSize}px ${scallopSize}px at ${scallopSize}px ${scallopSize}px, #000 98%, transparent 100%)`;
 
   return (
-    <div className="absolute right-6 top-6 z-20">
+    <div className="absolute right-4 top-4 md:right-6 md:top-6 z-20">
       <div
-        className="relative w-[110px] h-[140px] rotate-[-6deg]"
+        className="relative w-[92px] h-[118px] md:w-[110px] md:h-[140px] rotate-[-6deg]"
         style={{
           WebkitMaskImage: `${mask}, ${mask}, linear-gradient(#000,#000)`,
           WebkitMaskPosition: `0 0, ${scallopSize}px ${scallopSize}px, 0 0`,
@@ -492,29 +492,29 @@ function Stamp({
             border: '1px solid rgba(0,0,0,0.06)',
           }}
         >
-          <p className="text-[9px] font-bold tracking-widest uppercase text-slate-700 truncate">
+          <p className="text-[8px] md:text-[9px] font-bold tracking-widest uppercase text-slate-700 truncate">
             {label}
           </p>
         </div>
       </div>
 
       {/* Postmark overlay */}
-      <div className="absolute right-[40px] top-[46px] rotate-[8deg] opacity-35 pointer-events-none">
+      <div className="absolute right-[32px] top-[38px] md:right-[40px] md:top-[46px] rotate-[8deg] opacity-35 pointer-events-none">
         <div
-          className="w-[78px] h-[78px] rounded-full"
+          className="w-[66px] h-[66px] md:w-[78px] md:h-[78px] rounded-full"
           style={{
             border: '2px solid rgba(15,23,42,0.45)',
           }}
         />
         <div
-          className="absolute inset-0 w-[78px] h-[78px] rounded-full"
+          className="absolute inset-0 w-[66px] h-[66px] md:w-[78px] md:h-[78px] rounded-full"
           style={{
             border: '1px dashed rgba(15,23,42,0.45)',
             transform: 'scale(0.82)',
           }}
         />
         <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
-          <span className="text-[9px] font-bold tracking-widest text-slate-800/80">
+          <span className="text-[8px] md:text-[9px] font-bold tracking-widest text-slate-800/80">
             VIBE
           </span>
         </div>
@@ -707,21 +707,58 @@ const InteractionPage: React.FC<InteractionPageProps> = ({ theme, moodValue, win
         />
       </div>
 
-      <div className="relative z-10 w-full min-h-screen px-6 md:px-10 py-8 flex flex-col items-center">
+      <div className="relative z-10 w-full min-h-screen px-4 sm:px-6 md:px-10 py-6 sm:py-8 flex flex-col items-center">
         {/* Discreet top actions */}
         <div className="w-full max-w-3xl flex items-center justify-between gap-3">
           <button
             onClick={onBack}
-            className="text-sm font-semibold text-slate-700 hover:text-slate-900 transition-colors bg-white/40 backdrop-blur-md px-4 py-2 rounded-full shadow-sm hover:bg-white/60"
+            className="text-sm font-semibold text-white hover:text-white/90 transition-all duration-300 ease-out px-4 py-2 rounded-full border-[0.5px] border-transparent hover:border-transparent hover:scale-[1.02] active:scale-[0.98]"
+            style={{
+              // Back button: solid black background, no gradient.
+              // English comment required by user rule.
+              backgroundColor: 'rgba(0, 0, 0, 1)',
+              backgroundImage: 'none',
+              background: 'none',
+              borderColor: 'rgba(0, 0, 0, 0)',
+              borderImage: 'none',
+              backdropFilter: 'blur(20px) saturate(180%)',
+              WebkitBackdropFilter: 'blur(20px) saturate(180%)',
+              boxShadow: `
+                inset 0 1px 1px rgba(255,255,255,0.8),
+                inset 0 -1px 1px rgba(255,255,255,0.2),
+                0 2px 8px rgba(0,0,0,0.04),
+                0 4px 16px rgba(0,0,0,0.04)
+              `,
+            }}
           >
-            ← Back
+            <span className="text-base leading-none mr-1">&lt;</span> Back
           </button>
 
           <div className="flex items-center gap-2">
-            <span className="text-[11px] font-bold tracking-widest uppercase text-slate-700/80 bg-white/40 backdrop-blur-md px-3 py-2 rounded-full border border-white/30">
+            <span 
+              className="text-[11px] font-bold tracking-widest uppercase text-white/80 px-3 py-2 rounded-full"
+              style={{
+                // Glass badge: blur must stay visible; deepen via backdrop brightness/contrast (no blend-mode).
+                // English comment required by user rule.
+                backgroundColor: 'rgba(0, 0, 0, 0.22)',
+                backdropFilter: 'blur(16px) saturate(180%) brightness(0.78) contrast(1.08)',
+                WebkitBackdropFilter: 'blur(16px) saturate(180%) brightness(0.78) contrast(1.08)',
+                boxShadow: 'inset 0 1px 1px rgba(255,255,255,0.10), 0 8px 22px rgba(0,0,0,0.22)',
+              }}
+            >
               {theme.label}
             </span>
-            <span className="text-[11px] font-bold tracking-widest uppercase text-slate-700/80 bg-white/40 backdrop-blur-md px-3 py-2 rounded-full border border-white/30">
+            <span 
+              className="text-[11px] font-bold tracking-widest uppercase text-white/80 px-3 py-2 rounded-full"
+              style={{
+                // Glass badge: blur must stay visible; deepen via backdrop brightness/contrast (no blend-mode).
+                // English comment required by user rule.
+                backgroundColor: 'rgba(0, 0, 0, 0.22)',
+                backdropFilter: 'blur(16px) saturate(180%) brightness(0.78) contrast(1.08)',
+                WebkitBackdropFilter: 'blur(16px) saturate(180%) brightness(0.78) contrast(1.08)',
+                boxShadow: 'inset 0 1px 1px rgba(255,255,255,0.10), 0 8px 22px rgba(0,0,0,0.22)',
+              }}
+            >
               {wine.type.split(' ')[0]}
             </span>
           </div>
@@ -732,9 +769,11 @@ const InteractionPage: React.FC<InteractionPageProps> = ({ theme, moodValue, win
           <div
             className="relative overflow-hidden"
             style={{
-              // Fixed height to avoid "hug content" behavior.
+              // Use a responsive height so the letter fits on small screens.
               // English comment required by user rule.
-              height: '560px',
+              // English comment required by user rule.
+              height: 'min(560px, calc(100dvh - 220px))',
+              minHeight: '420px',
               background:
                 'linear-gradient(135deg, rgba(255,255,255,0.92) 0%, rgba(250,248,240,0.92) 40%, rgba(255,255,255,0.88) 100%)',
               boxShadow:
@@ -781,9 +820,9 @@ const InteractionPage: React.FC<InteractionPageProps> = ({ theme, moodValue, win
 
             <Stamp imageSrc={wine.imageSrc} theme={theme} label={wine.type.split(' ')[0]} />
 
-            <div className="relative p-7 md:p-10 pr-7 md:pr-10 flex-1 flex flex-col justify-center">
+            <div className="relative p-5 sm:p-7 md:p-10 pr-5 sm:pr-7 md:pr-10 flex-1 flex flex-col justify-center">
               {/* Header */}
-              <div className="pr-[130px] relative">
+              <div className="pr-[112px] sm:pr-[130px] relative">
                 {/* Invisible placeholder to establish stable height */}
                 <div className="invisible select-none" aria-hidden="true">
                   <h1 className="text-2xl md:text-3xl tracking-tight">
