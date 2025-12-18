@@ -42,40 +42,49 @@ const TarotCard: React.FC<TarotCardProps> = ({ data, theme, index, onReveal }) =
       >
         {/* --- FRONT (The Dream / Tarot Back) --- */}
         <div 
-            className="absolute inset-0 w-full h-full backface-hidden rounded-3xl overflow-hidden border border-white/40 shadow-xl"
-            style={{ 
-                // Glassy look with dynamic mood tint
-                background: `linear-gradient(135deg, rgba(255,255,255,0.6) 0%, rgba(255,255,255,0.2) 100%)`,
-                backdropFilter: 'blur(6px)',
-                boxShadow: `0 20px 40px -10px ${theme.color}40, inset 0 0 0 1px rgba(255,255,255,0.4)`
-            }}
+            className="absolute inset-0 w-full h-full backface-hidden rounded-3xl overflow-hidden border border-white/40 shadow-xl bg-white"
         >
+            {/* 1. Base Image (Clear) */}
+            <img
+                src={frontImageSrc}
+                alt={data.dreamTitle}
+                className="absolute inset-0 w-full h-full object-cover object-center"
+            />
+
+            {/* 2. Gaussian Blur Layer with Gradient Mask (Top and Bottom edges only) */}
+            <div 
+                className="absolute inset-0 z-10"
+                style={{ 
+                    WebkitMaskImage: 'linear-gradient(to bottom, black 0%, transparent 12%, transparent 88%, black 100%)',
+                    maskImage: 'linear-gradient(to bottom, black 0%, transparent 12%, transparent 88%, black 100%)',
+                }}
+            >
+                <img
+                    src={frontImageSrc}
+                    alt=""
+                    className="w-full h-full object-cover object-center"
+                    style={{ filter: 'blur(10px)' }}
+                />
+                {/* Glass tint overlay on the blurred parts */}
+                <div 
+                    className="absolute inset-0" 
+                    style={{ background: 'linear-gradient(to bottom, rgba(255,255,255,0.05) 0%, transparent 15%, transparent 85%, rgba(255,255,255,0.05) 100%)' }}
+                />
+            </div>
+
             {/* Decorative ambient gradients */}
             <div 
-                className="absolute top-[-20%] left-[-20%] w-[140%] h-[140%] opacity-40 mix-blend-overlay"
+                className="absolute inset-0 z-20 opacity-40 mix-blend-overlay pointer-events-none"
                 style={{ 
                     background: `radial-gradient(circle at 50% 30%, ${theme.color}, transparent 70%)` 
                 }}
             />
-            <div 
-                className="absolute bottom-[-10%] right-[-10%] w-[80%] h-[80%] opacity-30 mix-blend-multiply"
-                style={{ 
-                    background: `radial-gradient(circle, ${theme.accentColor}, transparent 70%)` 
-                }}
-            />
             
-            {/* Dream Front Image */}
-            <div className="absolute inset-0 p-4 flex items-center justify-center">
-                <div className="absolute inset-4 border border-white/30 rounded-2xl overflow-hidden">
-                    <img
-                        src={frontImageSrc}
-                        alt={data.dreamTitle}
-                        className="w-full h-full object-cover object-center"
-                    />
-                    {/* Subtle readability overlay for title */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
-                </div>
+            {/* Inner Border / Glow */}
+            <div className="absolute inset-0 z-30 rounded-3xl shadow-[inset_0_0_0_1px_rgba(255,255,255,0.4)] pointer-events-none" />
 
+            {/* Content Container */}
+            <div className="absolute inset-0 z-40 p-4 flex items-center justify-center">
                 {/* Title + hint */}
                 <div className="absolute bottom-8 left-8 right-8 text-center">
                     <h3 className="text-2xl font-bold text-white tracking-widest uppercase mb-2 drop-shadow-md" style={{ fontFamily: 'Manrope' }}>
