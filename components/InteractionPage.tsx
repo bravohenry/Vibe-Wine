@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { MoodTheme } from '../types';
 import { WineDream } from '../constants';
@@ -523,10 +523,123 @@ function Stamp({
   );
 }
 
+// Typing effect component
+const TypingEffect = ({ lines, startTyping, onComplete }: { lines: string[], startTyping: boolean, onComplete?: () => void }) => {
+  const [displayedLines, setDisplayedLines] = useState<string[]>([]);
+  const [currentLineIndex, setCurrentLineIndex] = useState(0);
+  const [currentCharIndex, setCurrentCharIndex] = useState(0);
+  const [didComplete, setDidComplete] = useState(false);
+
+  // Reset if lines change
+  useEffect(() => {
+    setDisplayedLines([]);
+    setCurrentLineIndex(0);
+    setCurrentCharIndex(0);
+    setDidComplete(false);
+  }, [lines]);
+
+  useEffect(() => {
+    if (!startTyping) return;
+
+    if (currentLineIndex >= lines.length) {
+      if (!didComplete) {
+        // Ensure completion callback fires only once.
+        // English comment required by user rule.
+        setDidComplete(true);
+        if (onComplete) onComplete();
+      }
+      return;
+    }
+
+    const currentLine = lines[currentLineIndex];
+    if (currentCharIndex < currentLine.length) {
+      const timeout = setTimeout(() => {
+        setDisplayedLines((prev) => {
+          const newLines = [...prev];
+          if (!newLines[currentLineIndex]) {
+             newLines[currentLineIndex] = '';
+          }
+          newLines[currentLineIndex] = currentLine.substring(0, currentCharIndex + 1);
+          return newLines;
+        });
+        setCurrentCharIndex((prev) => prev + 1);
+      }, 50); // Typing speed
+      return () => clearTimeout(timeout);
+    } else {
+      // Line finished, move to next
+      const timeout = setTimeout(() => {
+        setCurrentLineIndex((prev) => prev + 1);
+        setCurrentCharIndex(0);
+      }, 300); // Pause between lines
+      return () => clearTimeout(timeout);
+    }
+  }, [startTyping, currentLineIndex, currentCharIndex, lines]);
+
+  // If not started, show nothing
+  if (!startTyping) return null;
+
+  return (
+    <>
+      {displayedLines.map((line, i) => (
+        <motion.p
+          key={i}
+          className={[
+            'text-slate-600 leading-relaxed text-center',
+            i === 0 ? 'text-lg md:text-xl' : 'text-lg',
+          ].join(' ')}
+        >
+          {line}
+          {i === currentLineIndex && currentLineIndex < lines.length && (
+            <span className="animate-pulse inline-block w-0.5 h-4 ml-0.5 bg-slate-400 align-middle"></span>
+          )}
+        </motion.p>
+      ))}
+    </>
+  );
+};
+
+function formatPoemSubtitle(tags: string[]) {
+  // Turn tags into a natural-language subtitle like: "Crisp, Forgive, and Glow."
+  // English comment required by user rule.
+  const clean = (tags || [])
+    .filter(Boolean)
+    .slice(0, 3)
+    .map((t) => t.trim())
+    .filter(Boolean)
+    .map((t) => t.replace(/[_-]+/g, ' '))
+    .map((t) => t.charAt(0).toUpperCase() + t.slice(1));
+
+  if (clean.length === 0) return '';
+  if (clean.length === 1) return `${clean[0]}.`;
+  if (clean.length === 2) return `${clean[0]} and ${clean[1]}.`;
+  return `${clean[0]}, ${clean[1]}, and ${clean[2]}.`;
+}
+
 const InteractionPage: React.FC<InteractionPageProps> = ({ theme, moodValue, wine, onBack }) => {
   // Use theme label as the mood text on this page.
   // English comment required by user rule.
   const moodLabel = theme.label;
+
+  // Animation states
+  const [isTitleLoading, setIsTitleLoading] = useState(true);
+  const [startPoemTyping, setStartPoemTyping] = useState(false);
+  const [poemComplete, setPoemComplete] = useState(false);
+
+  useEffect(() => {
+    // Start title loading animation
+    const titleTimer = setTimeout(() => {
+      setIsTitleLoading(false);
+      
+      // Start poem typing 1s after title appears
+      const poemTimer = setTimeout(() => {
+        setStartPoemTyping(true);
+      }, 1000);
+
+      return () => clearTimeout(poemTimer);
+    }, 1500); // Title "loading" duration
+
+    return () => clearTimeout(titleTimer);
+  }, []);
 
   const content = useMemo(() => {
     // Use fixed poems (40 total: 8 wines × 5 mood keys).
@@ -547,6 +660,11 @@ const InteractionPage: React.FC<InteractionPageProps> = ({ theme, moodValue, win
     // English comment required by user rule.
     return content.lines.slice(0, 4);
   }, [content.lines]);
+
+  const poemSubtitle = useMemo(() => {
+    // English comment required by user rule.
+    return formatPoemSubtitle(content.tags);
+  }, [content.tags]);
 
   return (
     <div className="w-full min-h-screen relative overflow-hidden">
@@ -665,148 +783,137 @@ const InteractionPage: React.FC<InteractionPageProps> = ({ theme, moodValue, win
 
             <div className="relative p-7 md:p-10 pr-7 md:pr-10 flex-1 flex flex-col justify-center">
               {/* Header */}
-              <div className="pr-[130px]">
-                <h1 className="text-2xl md:text-3xl text-slate-900 tracking-tight">
-                  {content.title}
-                </h1>
-                <p className="mt-2 text-sm text-slate-700/80">
-                  {wine.name} · {wine.region}
-                </p>
+              <div className="pr-[130px] relative">
+                {/* Invisible placeholder to establish stable height */}
+                <div className="invisible select-none" aria-hidden="true">
+                  <h1 className="text-2xl md:text-3xl tracking-tight">
+                    {content.title}
+                  </h1>
+                  <p className="mt-2 text-sm">
+                    {wine.name}
+                  </p>
+                </div>
+
+                {/* Visible content layer */}
+                <div className="absolute inset-0">
+                  <AnimatePresence mode="wait">
+                    {isTitleLoading ? (
+                      <motion.div 
+                        key="loading-title"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="w-full" 
+                      >
+                         <div className="h-8 w-3/4 bg-slate-200/50 rounded animate-pulse mb-2" />
+                         <div className="h-4 w-2/3 bg-slate-200/50 rounded animate-pulse" />
+                      </motion.div>
+                    ) : (
+                      <motion.div
+                        key="title"
+                        initial={{ opacity: 0, y: 5 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.5 }}
+                      >
+                        <h1 className="text-2xl md:text-3xl text-slate-900 tracking-tight">
+                          {content.title}
+                        </h1>
+                        <p className="mt-2 text-sm text-slate-700/80">
+                          {wine.name}
+                        </p>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
               </div>
 
               {/* Divider */}
               <div className="mt-6 h-px w-full bg-slate-900/10" />
 
               {/* Lyrics (lighter + less dense) */}
-              <div className="mt-0 text-center">
-                <AnimatePresence mode="wait">
-                  <motion.div
-                    key={`${wine.id}-${Math.round(moodValue)}`}
-                    initial={{ opacity: 0, y: 8, filter: 'blur(6px)' }}
-                    animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
-                    exit={{ opacity: 0, y: -6, filter: 'blur(8px)' }}
-                    transition={{ duration: 0.35 }}
-                    className="mt-4 space-y-4"
-                  >
-                    {letterLines.map((line, i) => (
-                      <motion.p
-                        key={`${i}-${line}`}
-                        initial={{ opacity: 0, y: 6 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.04 + i * 0.06, duration: 0.32 }}
-                        className={[
-                          'text-slate-600 leading-relaxed text-center',
-                          i === 0 ? 'text-lg md:text-xl' : 'text-lg',
-                        ].join(' ')}
-                      >
-                        {line}
-                      </motion.p>
-                    ))}
-                  </motion.div>
-                </AnimatePresence>
+              <div className="mt-0 text-center relative">
+                {/* Invisible placeholder to establish stable height */}
+                <div className="mt-4 space-y-4 invisible select-none" aria-hidden="true">
+                  {/* Space for the poem subtitle */}
+                  <div className="pb-1">
+                    <p className="text-[13px] leading-snug font-serif italic tracking-tight">
+                      {poemSubtitle || ' '}
+                    </p>
+                  </div>
+                  {letterLines.map((line, i) => (
+                    <p
+                      key={i}
+                      className={[
+                        'text-slate-600 leading-relaxed text-center',
+                        i === 0 ? 'text-lg md:text-xl' : 'text-lg',
+                      ].join(' ')}
+                    >
+                      {line}
+                    </p>
+                  ))}
+                  {/* Space for the signature */}
+                  <div className="pt-6">
+                    <p className="text-sm">{wine.region}</p>
+                  </div>
+                </div>
+
+                {/* Animated typing layer overlaid exactly on top */}
+                <div className="absolute inset-0 mt-8 space-y-4">
+                   {/* Poem subtitle appears with the poem typing */}
+                   <motion.div
+                     initial={{ opacity: 0, y: 4, filter: 'blur(6px)' }}
+                     animate={{
+                       opacity: startPoemTyping ? 1 : 0,
+                       y: startPoemTyping ? 0 : 4,
+                       filter: startPoemTyping ? 'blur(0px)' : 'blur(6px)',
+                     }}
+                     transition={{ duration: 0.45 }}
+                     className="pb-1"
+                   >
+                     <p className="text-[13px] leading-snug font-serif italic text-slate-900/75 tracking-tight">
+                       {poemSubtitle}
+                     </p>
+                   </motion.div>
+                   <TypingEffect 
+                      lines={letterLines} 
+                      startTyping={startPoemTyping} 
+                      onComplete={() => setPoemComplete(true)}
+                    />
+                   
+                   {/* Signature / Location appearing after poem */}
+                   <motion.div 
+                     className="pt-6 flex justify-center"
+                     initial={{ opacity: 0, y: 10, filter: 'blur(10px)' }}
+                     animate={{
+                       opacity: poemComplete ? 1 : 0,
+                       y: poemComplete ? 0 : 10,
+                       filter: poemComplete ? 'blur(0px)' : 'blur(10px)',
+                     }}
+                     transition={{ duration: 0.7, delay: 0.25, ease: 'easeOut' }}
+                   >
+                      <p className="text-sm text-slate-700/80 font-serif italic">
+                        — {wine.region}
+                      </p>
+                   </motion.div>
+                </div>
               </div>
             </div>
 
-            {/* SVG Wax Seal */}
-            <div className="absolute left-6 bottom-6 z-20 rotate-[-12deg]">
-              <svg width="120" height="120" viewBox="0 0 100 100" className="drop-shadow-md">
-                <defs>
-                  {/* Filter for the Wax Body: soft highlight + depth */}
-                  <filter id="wax-body" x="-20%" y="-20%" width="140%" height="140%">
-                    <feGaussianBlur in="SourceAlpha" stdDeviation="1.5" result="blur" />
-                    <feSpecularLighting
-                      in="blur"
-                      surfaceScale="3"
-                      specularConstant="0.8"
-                      specularExponent="15"
-                      lightingColor="#ffffff"
-                      result="specular"
-                    >
-                      <fePointLight x="-50" y="-50" z="200" />
-                    </feSpecularLighting>
-                    <feComposite in="specular" in2="SourceAlpha" operator="in" result="specular-composite" />
-                    <feComposite in="SourceGraphic" in2="specular-composite" operator="arithmetic" k1="0" k2="1" k3="1" k4="0" />
-                  </filter>
-
-                  {/* Filter for Debossed Ring: Strong inner shadow to look carved */}
-                  <filter id="ring-deboss" x="-20%" y="-20%" width="140%" height="140%">
-                     {/* 1. Dark Shadow (Top-Left) */}
-                    <feFlood floodColor="rgba(50, 0, 0, 0.6)" result="shadowColor" />
-                    <feComposite in="shadowColor" in2="SourceAlpha" operator="in" result="coloredShadow" />
-                    <feOffset dx="1.5" dy="1.5" in="coloredShadow" result="offsetShadow" />
-                    <feComposite in="offsetShadow" in2="SourceAlpha" operator="in" result="innerShadow" />
-                    
-                    {/* 2. Light Highlight (Bottom-Right) */}
-                    <feFlood floodColor="rgba(255, 255, 255, 0.25)" result="hiliteColor" />
-                    <feComposite in="hiliteColor" in2="SourceAlpha" operator="in" result="coloredHilite" />
-                    <feOffset dx="-1" dy="-1" in="coloredHilite" result="offsetHilite" />
-                    <feComposite in="offsetHilite" in2="SourceAlpha" operator="in" result="innerHilite" />
-
-                    <feMerge>
-                      <feMergeNode in="SourceGraphic" />
-                      <feMergeNode in="innerShadow" />
-                      <feMergeNode in="innerHilite" />
-                    </feMerge>
-                  </filter>
-
-                  {/* Text Deboss Filter: Sharper, smaller offset */}
-                  <filter id="text-deboss" x="-20%" y="-20%" width="140%" height="140%">
-                    <feFlood floodColor="rgba(40,0,0,0.5)" result="shadowColor" />
-                    <feOffset dx="0.5" dy="0.5" in="SourceAlpha" result="offsetShadow" />
-                    <feComposite in="shadowColor" in2="offsetShadow" operator="in" result="innerShadow" />
-                    <feMerge>
-                      <feMergeNode in="SourceGraphic" />
-                      <feMergeNode in="innerShadow" />
-                    </feMerge>
-                  </filter>
-                </defs>
-
-                {/* Wax Blob Shape */}
-                <path
-                  d="M50 2 C 65 0, 80 8, 90 20 C 98 32, 98 50, 92 65 C 85 80, 70 95, 50 96 C 30 98, 12 85, 5 65 C -2 45, 8 20, 25 8 C 35 2, 42 3, 50 2 Z"
-                  fill="#b91c1c"
-                  filter="url(#wax-body)"
-                />
-
-                {/* Inner Ring - Carved Groove */}
-                {/* Drawn as a thick stroke but filtered to look like a trench */}
-                <circle
-                  cx="50"
-                  cy="50"
-                  r="34"
-                  fill="none"
-                  stroke="#991b1b"
-                  strokeWidth="2.5"
-                  filter="url(#ring-deboss)"
-                  opacity="0.9"
-                />
-
-                {/* Text Content */}
-                <foreignObject x="20" y="20" width="60" height="60">
-                  <div 
-                    className="w-full h-full flex flex-col items-center justify-center gap-0.5"
-                    style={{ filter: 'url(#text-deboss)' }} 
-                  >
-                    {content.tags.slice(0, 3).map((t) => (
-                      <span
-                        key={t}
-                        className="text-[8px] font-bold uppercase tracking-widest leading-tight text-center"
-                        style={{
-                          color: '#5a0f0f',
-                          fontFamily: 'Manrope, sans-serif',
-                        }}
-                      >
-                        {t}
-                      </span>
-                    ))}
-                  </div>
-                </foreignObject>
-              </svg>
-            </div>
           </div>
 
           <p className="mt-4 text-xs text-slate-900/45 text-center">
             A small letter, paired to your mood.
+          </p>
+          <p className="mt-1 text-[11px] text-slate-900/35 text-center">
+            Brew by{' '}
+            <a
+              href="https://www.linkedin.com/in/zihanhwang/"
+              target="_blank"
+              rel="noreferrer"
+              className="underline underline-offset-2 hover:text-slate-900/60 transition-colors"
+            >
+              Zihan Huang
+            </a>
           </p>
         </div>
       </div>
@@ -815,5 +922,3 @@ const InteractionPage: React.FC<InteractionPageProps> = ({ theme, moodValue, win
 };
 
 export default InteractionPage;
-
-
