@@ -1,5 +1,5 @@
-import React from 'react';
-import { motion, useTime, useTransform } from 'framer-motion';
+import React, { useMemo } from 'react';
+import { motion, useReducedMotion } from 'framer-motion';
 import { MoodTheme } from '../types';
 
 interface MoodShapeProps {
@@ -8,7 +8,7 @@ interface MoodShapeProps {
 
 const MoodShape: React.FC<MoodShapeProps> = ({ theme }) => {
   const { shapeParams, color, accentColor } = theme;
-  const time = useTime();
+  const shouldReduceMotion = useReducedMotion();
 
   // Generate SVG path data.
   // Using a cleaner harmonic formula to match the "perfect" geometric look of the reference.
@@ -57,20 +57,34 @@ const MoodShape: React.FC<MoodShapeProps> = ({ theme }) => {
     return d;
   };
 
-  // Rotation: Slow and steady
-  const rotation = useTransform(time, (t) => (t / 60000) * Math.PI * 2);
+  // Precompute static paths. We intentionally remove rotation (user requested no rotation).
+  // English comment required by user rule.
+  const paths = useMemo(() => {
+    return {
+      // Define layers based on the reference image proportions
+      // 1. Large Outer Glass
+      path1: generatePath(160, shapeParams, 0),
+      // 2. Middle Glass
+      path2: generatePath(125, shapeParams, 0),
+      // 3. Inner Glass
+      path3: generatePath(90, shapeParams, 0),
+      // 4. Center Opaque Core
+      path4: generatePath(55, shapeParams, 0),
+      // 5. Tiny Center Dot
+      path5: generatePath(10, shapeParams, 0),
+    };
+  }, [shapeParams]);
 
-  // Define layers based on the reference image proportions
-  // 1. Large Outer Glass
-  const path1 = useTransform(rotation, (r) => generatePath(160, shapeParams, r));
-  // 2. Middle Glass
-  const path2 = useTransform(rotation, (r) => generatePath(125, shapeParams, r));
-  // 3. Inner Glass
-  const path3 = useTransform(rotation, (r) => generatePath(90, shapeParams, r));
-  // 4. Center Opaque Core
-  const path4 = useTransform(rotation, (r) => generatePath(55, shapeParams, r));
-  // 5. Tiny Center Dot (optional, can be a simple circle but let's use the shape)
-  const path5 = useTransform(rotation, (r) => generatePath(10, shapeParams, r));
+  // Layered breathing: inner leads, outer follows. Scale only (no translate, no rotation).
+  // English comment required by user rule.
+  const breathDuration = 5.2;
+  const centerOrigin = {
+    // SVG transform origin needs explicit settings.
+    // English comment required by user rule.
+    transformBox: 'fill-box' as const,
+    transformOrigin: 'center',
+    willChange: 'transform',
+  };
 
   return (
     <div className="relative w-[400px] h-[400px] flex items-center justify-center">
@@ -144,60 +158,123 @@ const MoodShape: React.FC<MoodShapeProps> = ({ theme }) => {
 
         {/* --- Layer 1 (Outer) --- */}
         <motion.path
-          d={path1}
+          d={paths.path1}
           fill="url(#glassBody)"
           stroke="url(#rimLight)"
           strokeWidth="2" // Thicker rim for definition
           className="backdrop-blur-[2px]"
-          style={{ filter: 'url(#glossFilter)' }}
+          animate={
+            shouldReduceMotion
+              ? undefined
+              : { scale: [1, 1.012, 1] }
+          }
+          transition={
+            shouldReduceMotion
+              ? undefined
+              : { duration: breathDuration, ease: 'easeInOut', repeat: Infinity, times: [0, 0.70, 1] }
+          }
+          style={{ filter: 'url(#glossFilter)', ...centerOrigin }}
         />
         {/* Inner shadow/inset effect simulation via overlay stroke */}
         <motion.path 
-            d={path1} 
+            d={paths.path1} 
             fill="none" 
             stroke="white" 
             strokeWidth="1" 
             strokeOpacity="0.5"
             className="pointer-events-none"
+            animate={
+              shouldReduceMotion
+                ? undefined
+                : { scale: [1, 1.012, 1] }
+            }
+            transition={
+              shouldReduceMotion
+                ? undefined
+                : { duration: breathDuration, ease: 'easeInOut', repeat: Infinity, times: [0, 0.70, 1] }
+            }
+            style={centerOrigin}
         />
 
         {/* --- Layer 2 (Middle) --- */}
         <motion.path
-          d={path2}
+          d={paths.path2}
           fill="url(#glassBody)"
           stroke="url(#rimLight)"
           strokeWidth="2"
           className="backdrop-blur-[4px]"
-          style={{ filter: 'url(#glossFilter)' }}
+          animate={
+            shouldReduceMotion
+              ? undefined
+              : { scale: [1, 1.03, 1] }
+          }
+          transition={
+            shouldReduceMotion
+              ? undefined
+              : { duration: breathDuration, ease: 'easeInOut', repeat: Infinity, times: [0, 0.55, 1] }
+          }
+          style={{ filter: 'url(#glossFilter)', ...centerOrigin }}
         />
 
         {/* --- Layer 3 (Inner) --- */}
         <motion.path
-          d={path3}
+          d={paths.path3}
           fill="url(#glassBody)"
           stroke="url(#rimLight)"
           strokeWidth="1.5"
           className="backdrop-blur-[8px]"
-          style={{ filter: 'url(#glossFilter)' }}
+          animate={
+            shouldReduceMotion
+              ? undefined
+              : { scale: [1, 1.06, 1] }
+          }
+          transition={
+            shouldReduceMotion
+              ? undefined
+              : { duration: breathDuration, ease: 'easeInOut', repeat: Infinity, times: [0, 0.40, 1] }
+          }
+          style={{ filter: 'url(#glossFilter)', ...centerOrigin }}
         />
 
         {/* --- Layer 4 (Core) --- */}
         <motion.path
-          d={path4}
+          d={paths.path4}
           fill="url(#coreGradient)"
           // The core in the image has a soft glow, no heavy stroke
           stroke="white" 
           strokeWidth="0.5"
           strokeOpacity="0.8"
           className="drop-shadow-lg"
+          animate={
+            shouldReduceMotion
+              ? undefined
+              : { scale: [1, 1.085, 1] }
+          }
+          transition={
+            shouldReduceMotion
+              ? undefined
+              : { duration: breathDuration, ease: 'easeInOut', repeat: Infinity, times: [0, 0.32, 1] }
+          }
+          style={centerOrigin}
         />
         
         {/* --- Layer 5 (Center Dot) --- */}
         {/* The tiny white star in the center */}
          <motion.path
-          d={path5}
+          d={paths.path5}
           fill="white"
           className="blur-[1px]"
+          animate={
+            shouldReduceMotion
+              ? undefined
+              : { scale: [1, 1.1, 1] }
+          }
+          transition={
+            shouldReduceMotion
+              ? undefined
+              : { duration: breathDuration, ease: 'easeInOut', repeat: Infinity, times: [0, 0.28, 1] }
+          }
+          style={centerOrigin}
         />
 
       </svg>

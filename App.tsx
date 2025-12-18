@@ -3,7 +3,7 @@ import { getMoodTheme } from './constants';
 import MoodShape from './components/MoodShape';
 import MoodSlider from './components/MoodSlider';
 import DreamSelection from './components/DreamSelection';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import InteractionPage from './components/InteractionPage';
 import { WineDream } from './constants';
 
@@ -14,6 +14,7 @@ const App: React.FC = () => {
   const [selectedWine, setSelectedWine] = useState<WineDream | null>(null);
   
   const theme = getMoodTheme(moodValue);
+  const shouldReduceMotion = useReducedMotion();
 
   // Update body background color smoothly
   useEffect(() => {
@@ -28,13 +29,47 @@ const App: React.FC = () => {
       <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
           <motion.div 
             className="absolute top-[-10%] left-[-10%] w-[60vw] h-[60vw] rounded-full blur-[100px] opacity-60"
-            animate={{ backgroundColor: theme.color }}
-            transition={{ duration: 1 }}
+            animate={
+              shouldReduceMotion
+                ? { backgroundColor: theme.color }
+                : {
+                    backgroundColor: theme.color,
+                    // Layered breathing: scale only, no rotation, no vertical movement.
+                    // English comment required by user rule.
+                    scale: [1, 1.06, 1],
+                  }
+            }
+            transition={
+              shouldReduceMotion
+                ? { duration: 1 }
+                : {
+                    // Different phase/duration than other layers to create depth.
+                    // English comment required by user rule.
+                    backgroundColor: { duration: 1 },
+                    scale: { duration: 7.2, ease: 'easeInOut', repeat: Infinity, delay: 0.0 },
+                  }
+            }
           />
           <motion.div 
             className="absolute bottom-[-10%] right-[-10%] w-[70vw] h-[70vw] rounded-full blur-[120px] opacity-50"
-            animate={{ backgroundColor: theme.accentColor }}
-            transition={{ duration: 1 }}
+            animate={
+              shouldReduceMotion
+                ? { backgroundColor: theme.accentColor }
+                : {
+                    backgroundColor: theme.accentColor,
+                    // Slightly different breathing from the other glow for parallax-like depth.
+                    // English comment required by user rule.
+                    scale: [1, 1.045, 1],
+                  }
+            }
+            transition={
+              shouldReduceMotion
+                ? { duration: 1 }
+                : {
+                    backgroundColor: { duration: 1 },
+                    scale: { duration: 6.4, ease: 'easeInOut', repeat: Infinity, delay: 0.35 },
+                  }
+            }
           />
       </div>
 
