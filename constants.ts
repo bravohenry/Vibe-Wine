@@ -161,7 +161,7 @@ export const WINE_DREAMS: WineDream[] = [
     profile: "Green apple, citrus, white flowers, toasted brioche/almond.",
     serve: "6–8°C (43–46°F)",
     frontImageSrc: "/dream/1.png",
-    imageSrc: "/wine/Veuve Ambal – Méthode Traditionnelle Blanc de Blancs, Brut.webp"
+    imageSrc: "/wine/1.webp"
   },
   {
     id: 2,
@@ -173,7 +173,7 @@ export const WINE_DREAMS: WineDream[] = [
     profile: "Lime, green apple, white peach, high acidity.",
     serve: "7–10°C (45–50°F)",
     frontImageSrc: "/dream/2.png",
-    imageSrc: "/wine/FRITZ – Riesling.webp"
+    imageSrc: "/wine/2.webp"
   },
   {
     id: 3,
@@ -185,7 +185,7 @@ export const WINE_DREAMS: WineDream[] = [
     profile: "Lychee, rose petal, tropical fruit, spice; very aromatic.",
     serve: "8–10°C (46–50°F)",
     frontImageSrc: "/dream/3.png",
-    imageSrc: "/wine/Puiatti – Traminer.webp"
+    imageSrc: "/wine/3.webp"
   },
   {
     id: 4,
@@ -197,7 +197,7 @@ export const WINE_DREAMS: WineDream[] = [
     profile: "Citrus, stone fruit, grassy/gooseberry notes, crisp finish.",
     serve: "7–10°C (45–50°F)",
     frontImageSrc: "/dream/4.png",
-    imageSrc: "/wine/C’est La Vie! – Chardonnay–Sauvignon (Récolte 2023).webp"
+    imageSrc: "/wine/4.webp"
   },
   {
     id: 5,
@@ -209,7 +209,7 @@ export const WINE_DREAMS: WineDream[] = [
     profile: "Lemon, pear, melon; light body, clean acidity.",
     serve: "7–10°C (45–50°F)",
     frontImageSrc: "/dream/5.png",
-    imageSrc: "/wine/Hayes Ranch – Pinot Grigio (California).webp"
+    imageSrc: "/wine/5.webp"
   },
   {
     id: 6,
@@ -221,7 +221,7 @@ export const WINE_DREAMS: WineDream[] = [
     profile: "Red cherry, raspberry, light spice, softer tannin.",
     serve: "14–16°C (57–61°F)",
     frontImageSrc: "/dream/6.png",
-    imageSrc: "/wine/Labouré-Roi – “Princesse …” Coteaux Bourguignons (2023).webp",
+    imageSrc: "/wine/6.webp",
     isRed: true
   },
   {
@@ -234,7 +234,7 @@ export const WINE_DREAMS: WineDream[] = [
     profile: "Red fruit mixed with pepper & darker fruit notes.",
     serve: "14–16°C (57–61°F)",
     frontImageSrc: "/dream/7.png",
-    imageSrc: "/wine/C’est La Vie! – Pinot Noir–Syrah (Récolte 2023).webp",
+    imageSrc: "/wine/7.webp",
     isRed: true
   },
   {
@@ -247,7 +247,7 @@ export const WINE_DREAMS: WineDream[] = [
     profile: "Black cherry, plum, cocoa, dried herbs; firm but friendly.",
     serve: "16–18°C (61–64°F)",
     frontImageSrc: "/dream/8.png",
-    imageSrc: "/wine/Masciarelli – Montepulciano d’Abruzzo DOC (2022).webp",
+    imageSrc: "/wine/8.webp",
     isRed: true
   }
 ];
