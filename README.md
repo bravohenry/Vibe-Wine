@@ -4,20 +4,20 @@
 
 ## Vibe & Wine
 
-一个情绪驱动的交互式小体验：先选择你此刻的心情，再挑选一张“梦境酒牌”，最后获得一封与情绪匹配的短诗/小信，搭配对应酒款的氛围图像与玻璃质感视觉。
+An interactive, mood-driven mini experience: pick your current mood, choose a “dream wine” card, then receive a short letter/poem matched to that mood—paired with atmospheric imagery and glass-like visuals.
 
-### 体验流程
-- **Step 1**：滑动选择当前情绪（Mood Slider）
-- **Step 2**：从梦境卡牌中选择一张（Dream Selection）
-- **Step 3**：进入互动页，阅读与情绪对应的内容（Interaction Page）
+### User flow
+- **Step 1**: Choose your mood (Mood Slider)
+- **Step 2**: Pick a dream card (Dream Selection)
+- **Step 3**: Read your mood-matched letter (Interaction Page)
 
-### 技术栈
+### Tech stack
 - **React + TypeScript**
 - **Vite**
 - **Tailwind（CDN）**
 - **Framer Motion**（过渡与微动效）
 
-### 本地运行
+### Run locally
 **Prerequisites:** Node.js
 
 1. Install dependencies:
@@ -25,5 +25,5 @@
 2. Run the app:
    `npm run dev`
 
-### 在线版本
+### Live demo
 - AI Studio: `https://ai.studio/apps/drive/1X6yKLrdLv5iSOobQLIZDyU4oBJPCztha`
