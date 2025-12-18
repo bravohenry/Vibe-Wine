@@ -728,20 +728,35 @@ const InteractionPage: React.FC<InteractionPageProps> = ({ theme, moodValue, win
                     <feComposite in="SourceGraphic" in2="specular-composite" operator="arithmetic" k1="0" k2="1" k3="1" k4="0" />
                   </filter>
 
-                  {/* Filter for Debossed Effect (Inner Ring & Text): inset shadow */}
-                  <filter id="wax-deboss" x="-20%" y="-20%" width="140%" height="140%">
-                    <feFlood floodColor="rgba(0,0,0,0.6)" result="shadowColor" />
-                    <feOffset dx="0.5" dy="0.5" in="SourceAlpha" result="offsetShadow" />
-                    <feComposite in="shadowColor" in2="offsetShadow" operator="in" result="innerShadow" />
+                  {/* Filter for Debossed Ring: Strong inner shadow to look carved */}
+                  <filter id="ring-deboss" x="-20%" y="-20%" width="140%" height="140%">
+                     {/* 1. Dark Shadow (Top-Left) */}
+                    <feFlood floodColor="rgba(50, 0, 0, 0.6)" result="shadowColor" />
+                    <feComposite in="shadowColor" in2="SourceAlpha" operator="in" result="coloredShadow" />
+                    <feOffset dx="1.5" dy="1.5" in="coloredShadow" result="offsetShadow" />
+                    <feComposite in="offsetShadow" in2="SourceAlpha" operator="in" result="innerShadow" />
                     
-                    <feFlood floodColor="rgba(255,255,255,0.3)" result="highlightColor" />
-                    <feOffset dx="-0.5" dy="-0.5" in="SourceAlpha" result="offsetHighlight" />
-                    <feComposite in="highlightColor" in2="offsetHighlight" operator="in" result="innerHighlight" />
+                    {/* 2. Light Highlight (Bottom-Right) */}
+                    <feFlood floodColor="rgba(255, 255, 255, 0.25)" result="hiliteColor" />
+                    <feComposite in="hiliteColor" in2="SourceAlpha" operator="in" result="coloredHilite" />
+                    <feOffset dx="-1" dy="-1" in="coloredHilite" result="offsetHilite" />
+                    <feComposite in="offsetHilite" in2="SourceAlpha" operator="in" result="innerHilite" />
 
                     <feMerge>
                       <feMergeNode in="SourceGraphic" />
                       <feMergeNode in="innerShadow" />
-                      <feMergeNode in="innerHighlight" />
+                      <feMergeNode in="innerHilite" />
+                    </feMerge>
+                  </filter>
+
+                  {/* Text Deboss Filter: Sharper, smaller offset */}
+                  <filter id="text-deboss" x="-20%" y="-20%" width="140%" height="140%">
+                    <feFlood floodColor="rgba(40,0,0,0.5)" result="shadowColor" />
+                    <feOffset dx="0.5" dy="0.5" in="SourceAlpha" result="offsetShadow" />
+                    <feComposite in="shadowColor" in2="offsetShadow" operator="in" result="innerShadow" />
+                    <feMerge>
+                      <feMergeNode in="SourceGraphic" />
+                      <feMergeNode in="innerShadow" />
                     </feMerge>
                   </filter>
                 </defs>
@@ -751,25 +766,27 @@ const InteractionPage: React.FC<InteractionPageProps> = ({ theme, moodValue, win
                   d="M50 2 C 65 0, 80 8, 90 20 C 98 32, 98 50, 92 65 C 85 80, 70 95, 50 96 C 30 98, 12 85, 5 65 C -2 45, 8 20, 25 8 C 35 2, 42 3, 50 2 Z"
                   fill="#b91c1c"
                   filter="url(#wax-body)"
-                  stroke="#7f1d1d"
-                  strokeWidth="0.5"
                 />
 
-                {/* Inner Ring (Pressed In) */}
+                {/* Inner Ring - Carved Groove */}
+                {/* Drawn as a thick stroke but filtered to look like a trench */}
                 <circle
                   cx="50"
                   cy="50"
-                  r="32"
+                  r="34"
                   fill="none"
-                  stroke="#7f1d1d"
-                  strokeWidth="1.5"
-                  opacity="0.6"
-                  filter="url(#wax-deboss)"
+                  stroke="#991b1b"
+                  strokeWidth="2.5"
+                  filter="url(#ring-deboss)"
+                  opacity="0.9"
                 />
 
                 {/* Text Content */}
                 <foreignObject x="20" y="20" width="60" height="60">
-                  <div className="w-full h-full flex flex-col items-center justify-center gap-0.5">
+                  <div 
+                    className="w-full h-full flex flex-col items-center justify-center gap-0.5"
+                    style={{ filter: 'url(#text-deboss)' }} 
+                  >
                     {content.tags.slice(0, 3).map((t) => (
                       <span
                         key={t}
@@ -777,7 +794,6 @@ const InteractionPage: React.FC<InteractionPageProps> = ({ theme, moodValue, win
                         style={{
                           color: '#5a0f0f',
                           fontFamily: 'Manrope, sans-serif',
-                          textShadow: '0 1px 0 rgba(255,255,255,0.25)',
                         }}
                       >
                         {t}
