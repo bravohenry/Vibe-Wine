@@ -707,66 +707,56 @@ const InteractionPage: React.FC<InteractionPageProps> = ({ theme, moodValue, win
               </div>
             </div>
 
-            {/* Red wax seal (tags) at bottom-left - Refined Smooth Version */}
-            <div className="absolute left-6 bottom-6 z-20 rotate-[-12deg] pointer-events-none">
+            {/* Red wax seal (tags) at bottom-left */}
+            <div className="absolute left-8 bottom-8 z-20 rotate-[-12deg]">
               <div
-                className="relative w-28 h-28 flex items-center justify-center"
+                className="relative flex items-center justify-center w-24 h-24"
                 style={{
-                  // Organic outer shape
-                  borderRadius: '48% 52% 50% 50% / 50% 50% 52% 48%',
-                  // Base color: Rich dark red
-                  backgroundColor: '#b91c1c',
-                  // Soft drop shadow for depth on paper
-                  boxShadow: '2px 4px 12px rgba(0,0,0,0.25)',
+                  // Organic wax shape with irregular border radius
+                  // English comment required by user rule.
+                  borderRadius: '52% 48% 54% 46% / 48% 55% 45% 52%',
+                  // Wax material: Deep red gradient with slight transparency
+                  background:
+                    'radial-gradient(circle at 35% 35%, #ef4444, #b91c1c, #7f1d1d)',
+                  // 3D Lighting:
+                  // 1. Inset white top-left (specular highlight)
+                  // 2. Inset dark bottom-right (deep shadow inside wax)
+                  // 3. Drop shadow (shadow on paper)
+                  boxShadow: `
+                    inset 3px 3px 6px rgba(255, 255, 255, 0.35),
+                    inset -3px -3px 8px rgba(0, 0, 0, 0.45),
+                    2px 4px 6px rgba(0, 0, 0, 0.25)
+                  `,
                 }}
               >
-                {/* 1. The Raised Rim (Outer Ring) */}
+                {/* Inner Stamped Ring (debossed look) */}
                 <div
-                  className="absolute inset-0"
+                  className="absolute inset-2 rounded-full border-[2px]"
                   style={{
-                    borderRadius: 'inherit',
-                    // Gradient to simulate the rounded raised edge
-                    background: 'linear-gradient(135deg, #ef4444 0%, #b91c1c 50%, #7f1d1d 100%)',
-                    // Highlights and shadows to define the 3D volume of the rim
-                    boxShadow: `
-                      inset 2px 2px 4px rgba(255, 255, 255, 0.4),
-                      inset -2px -2px 6px rgba(0, 0, 0, 0.3)
-                    `,
+                    borderColor: 'rgba(69, 10, 10, 0.25)',
+                    // Debossed ring effect: light bottom-right, dark top-left
+                    boxShadow:
+                      'inset 1px 1px 2px rgba(0,0,0,0.3), 1px 1px 2px rgba(255,255,255,0.15)',
                   }}
                 />
 
-                {/* 2. The Inner Depressed Area (Concave) */}
-                <div
-                  className="absolute inset-[14px] rounded-full flex items-center justify-center"
-                  style={{
-                    backgroundColor: '#991b1b',
-                    // Inner shadow to create the "pressed in" look
-                    boxShadow: `
-                      inset 3px 3px 8px rgba(0, 0, 0, 0.4),
-                      inset -2px -2px 6px rgba(255, 255, 255, 0.15)
-                    `,
-                  }}
-                >
-                  {/* Content (Tags) - Debossed Text */}
-                  <div className="flex flex-col items-center justify-center gap-0.5">
-                    {content.tags.slice(0, 3).map((t) => (
-                      <span
-                        key={t}
-                        className="text-[11px] font-bold uppercase tracking-widest leading-tight"
-                        style={{
-                          color: '#7f1d1d', // Dark red text
-                          // Soft letterpress effect:
-                          // Dark shadow top-left (inside the carving)
-                          // Light highlight bottom-right (catching light edge)
-                          textShadow: '0.5px 0.5px 0px rgba(255,255,255,0.2), -0.5px -0.5px 0px rgba(0,0,0,0.3)',
-                          fontFamily: 'Manrope',
-                          opacity: 0.9,
-                        }}
-                      >
-                        {t}
-                      </span>
-                    ))}
-                  </div>
+                {/* Content (Tags) - "Pressed" into wax */}
+                <div className="relative z-10 flex flex-col items-center gap-0.5 transform scale-90">
+                  {content.tags.slice(0, 3).map((t) => (
+                    <span
+                      key={t}
+                      className="text-[10px] font-bold uppercase tracking-widest leading-tight"
+                      style={{
+                        // Deep dark red text
+                        color: 'rgba(60, 5, 5, 0.85)',
+                        // Text shadow: light below to look debossed (carved in)
+                        textShadow: '0px 1px 0px rgba(255,255,255,0.2)',
+                        fontFamily: 'Manrope', // Clean sans-serif for "Official Seal" look
+                      }}
+                    >
+                      {t}
+                    </span>
+                  ))}
                 </div>
               </div>
             </div>
