@@ -707,58 +707,85 @@ const InteractionPage: React.FC<InteractionPageProps> = ({ theme, moodValue, win
               </div>
             </div>
 
-            {/* Red wax seal (tags) at bottom-left */}
-            <div className="absolute left-8 bottom-8 z-20 rotate-[-12deg]">
-              <div
-                className="relative flex items-center justify-center w-24 h-24"
-                style={{
-                  // Organic wax shape with irregular border radius
-                  // English comment required by user rule.
-                  borderRadius: '52% 48% 54% 46% / 48% 55% 45% 52%',
-                  // Wax material: Deep red gradient with slight transparency
-                  background:
-                    'radial-gradient(circle at 35% 35%, #ef4444, #b91c1c, #7f1d1d)',
-                  // 3D Lighting:
-                  // 1. Inset white top-left (specular highlight)
-                  // 2. Inset dark bottom-right (deep shadow inside wax)
-                  // 3. Drop shadow (shadow on paper)
-                  boxShadow: `
-                    inset 3px 3px 6px rgba(255, 255, 255, 0.35),
-                    inset -3px -3px 8px rgba(0, 0, 0, 0.45),
-                    2px 4px 6px rgba(0, 0, 0, 0.25)
-                  `,
-                }}
-              >
-                {/* Inner Stamped Ring (debossed look) */}
-                <div
-                  className="absolute inset-2 rounded-full border-[2px]"
-                  style={{
-                    borderColor: 'rgba(69, 10, 10, 0.25)',
-                    // Debossed ring effect: light bottom-right, dark top-left
-                    boxShadow:
-                      'inset 1px 1px 2px rgba(0,0,0,0.3), 1px 1px 2px rgba(255,255,255,0.15)',
-                  }}
+            {/* SVG Wax Seal */}
+            <div className="absolute left-6 bottom-6 z-20 rotate-[-12deg]">
+              <svg width="120" height="120" viewBox="0 0 100 100" className="drop-shadow-md">
+                <defs>
+                  {/* Filter for the Wax Body: soft highlight + depth */}
+                  <filter id="wax-body" x="-20%" y="-20%" width="140%" height="140%">
+                    <feGaussianBlur in="SourceAlpha" stdDeviation="1.5" result="blur" />
+                    <feSpecularLighting
+                      in="blur"
+                      surfaceScale="3"
+                      specularConstant="0.8"
+                      specularExponent="15"
+                      lightingColor="#ffffff"
+                      result="specular"
+                    >
+                      <fePointLight x="-50" y="-50" z="200" />
+                    </feSpecularLighting>
+                    <feComposite in="specular" in2="SourceAlpha" operator="in" result="specular-composite" />
+                    <feComposite in="SourceGraphic" in2="specular-composite" operator="arithmetic" k1="0" k2="1" k3="1" k4="0" />
+                  </filter>
+
+                  {/* Filter for Debossed Effect (Inner Ring & Text): inset shadow */}
+                  <filter id="wax-deboss" x="-20%" y="-20%" width="140%" height="140%">
+                    <feFlood floodColor="rgba(0,0,0,0.6)" result="shadowColor" />
+                    <feOffset dx="0.5" dy="0.5" in="SourceAlpha" result="offsetShadow" />
+                    <feComposite in="shadowColor" in2="offsetShadow" operator="in" result="innerShadow" />
+                    
+                    <feFlood floodColor="rgba(255,255,255,0.3)" result="highlightColor" />
+                    <feOffset dx="-0.5" dy="-0.5" in="SourceAlpha" result="offsetHighlight" />
+                    <feComposite in="highlightColor" in2="offsetHighlight" operator="in" result="innerHighlight" />
+
+                    <feMerge>
+                      <feMergeNode in="SourceGraphic" />
+                      <feMergeNode in="innerShadow" />
+                      <feMergeNode in="innerHighlight" />
+                    </feMerge>
+                  </filter>
+                </defs>
+
+                {/* Wax Blob Shape */}
+                <path
+                  d="M50 2 C 65 0, 80 8, 90 20 C 98 32, 98 50, 92 65 C 85 80, 70 95, 50 96 C 30 98, 12 85, 5 65 C -2 45, 8 20, 25 8 C 35 2, 42 3, 50 2 Z"
+                  fill="#b91c1c"
+                  filter="url(#wax-body)"
+                  stroke="#7f1d1d"
+                  strokeWidth="0.5"
                 />
 
-                {/* Content (Tags) - "Pressed" into wax */}
-                <div className="relative z-10 flex flex-col items-center gap-0.5 transform scale-90">
-                  {content.tags.slice(0, 3).map((t) => (
-                    <span
-                      key={t}
-                      className="text-[10px] font-bold uppercase tracking-widest leading-tight"
-                      style={{
-                        // Deep dark red text
-                        color: 'rgba(60, 5, 5, 0.85)',
-                        // Text shadow: light below to look debossed (carved in)
-                        textShadow: '0px 1px 0px rgba(255,255,255,0.2)',
-                        fontFamily: 'Manrope', // Clean sans-serif for "Official Seal" look
-                      }}
-                    >
-                      {t}
-                    </span>
-                  ))}
-                </div>
-              </div>
+                {/* Inner Ring (Pressed In) */}
+                <circle
+                  cx="50"
+                  cy="50"
+                  r="32"
+                  fill="none"
+                  stroke="#7f1d1d"
+                  strokeWidth="1.5"
+                  opacity="0.6"
+                  filter="url(#wax-deboss)"
+                />
+
+                {/* Text Content */}
+                <foreignObject x="20" y="20" width="60" height="60">
+                  <div className="w-full h-full flex flex-col items-center justify-center gap-0.5">
+                    {content.tags.slice(0, 3).map((t) => (
+                      <span
+                        key={t}
+                        className="text-[8px] font-bold uppercase tracking-widest leading-tight text-center"
+                        style={{
+                          color: '#5a0f0f',
+                          fontFamily: 'Manrope, sans-serif',
+                          textShadow: '0 1px 0 rgba(255,255,255,0.25)',
+                        }}
+                      >
+                        {t}
+                      </span>
+                    ))}
+                  </div>
+                </foreignObject>
+              </svg>
             </div>
           </div>
 
