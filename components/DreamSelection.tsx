@@ -25,6 +25,10 @@ const DreamSelection: React.FC<DreamSelectionProps> = ({ theme, onBack, onDrink 
   const items = useMemo(() => shuffleArray(WINE_DREAMS), []);
   const carouselRef = useRef<HTMLDivElement | null>(null);
   const [revealedWine, setRevealedWine] = useState<WineDream | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const [startX, setStartX] = useState(0);
+  const [scrollLeft, setScrollLeft] = useState(0);
+  const hasMovedRef = useRef(false);
 
   // Scroll the clicked card to the center of the carousel
   const scrollCardToCenter = (index: number) => {
@@ -39,6 +43,65 @@ const DreamSelection: React.FC<DreamSelectionProps> = ({ theme, onBack, onDrink 
         block: 'nearest' 
       });
     }
+  };
+
+  // Mouse drag handlers for carousel
+  const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
+    const carousel = carouselRef.current;
+    if (!carousel) return;
+    
+    setIsDragging(true);
+    hasMovedRef.current = false;
+    setStartX(e.pageX - carousel.offsetLeft);
+    setScrollLeft(carousel.scrollLeft);
+    carousel.style.cursor = 'grabbing';
+    carousel.style.userSelect = 'none';
+    // Disable snap during drag for smoother experience
+    carousel.style.scrollSnapType = 'none';
+  };
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    const carousel = carouselRef.current;
+    if (!carousel || !isDragging) return;
+    
+    e.preventDefault();
+    const x = e.pageX - carousel.offsetLeft;
+    const walk = (x - startX) * 1.5; // Scroll speed multiplier
+    
+    // Check if user has moved enough to consider it a drag
+    if (Math.abs(walk) > 5) {
+      hasMovedRef.current = true;
+    }
+    
+    carousel.scrollLeft = scrollLeft - walk;
+  };
+
+  const handleMouseUp = () => {
+    const carousel = carouselRef.current;
+    if (!carousel) return;
+    
+    // Small delay to allow card click handler to check hasMovedRef
+    setTimeout(() => {
+      setIsDragging(false);
+      hasMovedRef.current = false;
+    }, 10);
+    
+    carousel.style.cursor = 'grab';
+    carousel.style.userSelect = 'auto';
+    // Re-enable snap after drag
+    carousel.style.scrollSnapType = 'x mandatory';
+  };
+
+  const handleMouseLeave = () => {
+    const carousel = carouselRef.current;
+    if (!carousel) return;
+    
+    setIsDragging(false);
+    hasMovedRef.current = false;
+    carousel.style.cursor = 'grab';
+    carousel.style.userSelect = 'auto';
+    // Re-enable snap after drag
+    carousel.style.scrollSnapType = 'x mandatory';
   };
 
   useEffect(() => {
@@ -142,7 +205,12 @@ const DreamSelection: React.FC<DreamSelectionProps> = ({ theme, onBack, onDrink 
              // Hide native scrollbars for a cleaner look
              scrollbarWidth: 'none', 
              msOverflowStyle: 'none',
+             cursor: isDragging ? 'grabbing' : 'grab',
         }}
+        onMouseDown={handleMouseDown}
+        onMouseMove={handleMouseMove}
+        onMouseUp={handleMouseUp}
+        onMouseLeave={handleMouseLeave}
       >
         {items.map((dream, index) => (
             <motion.div 
@@ -170,8 +238,11 @@ const DreamSelection: React.FC<DreamSelectionProps> = ({ theme, onBack, onDrink 
                         theme={theme}
                         index={index}
                         onReveal={(wine) => {
-                          setRevealedWine(wine);
-                          scrollCardToCenter(index);
+                          // Only reveal if user didn't drag
+                          if (!hasMovedRef.current) {
+                            setRevealedWine(wine);
+                            scrollCardToCenter(index);
+                          }
                         }}
                       />
                 </div>
