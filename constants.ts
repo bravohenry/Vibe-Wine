@@ -168,7 +168,7 @@ export const WINE_DREAMS: WineDream[] = [
     dreamTitle: "The Clarity",
     name: "FRITZ – Riesling",
     type: "Still White Wine",
-    region: "Unknown",
+    region: "Germany (Mosel)",
     grapes: "Riesling",
     profile: "Lime, green apple, white peach, high acidity.",
     serve: "7–10°C (45–50°F)",
