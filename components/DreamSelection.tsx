@@ -1,8 +1,18 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { WINE_DREAMS, WineDream } from '../constants';
 import { MoodTheme } from '../types';
 import TarotCard from './TarotCard';
+
+// Fisher-Yates shuffle algorithm for randomizing array order
+const shuffleArray = <T,>(array: T[]): T[] => {
+  const shuffled = [...array];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  return shuffled;
+};
 
 interface DreamSelectionProps {
   theme: MoodTheme;
@@ -11,10 +21,25 @@ interface DreamSelectionProps {
 }
 
 const DreamSelection: React.FC<DreamSelectionProps> = ({ theme, onBack, onDrink }) => {
-  // Only render the original 8 items (no "infinite" duplication).
-  const items = WINE_DREAMS;
+  // Shuffle wine dreams on each mount so the order is randomized every time.
+  const items = useMemo(() => shuffleArray(WINE_DREAMS), []);
   const carouselRef = useRef<HTMLDivElement | null>(null);
   const [revealedWine, setRevealedWine] = useState<WineDream | null>(null);
+
+  // Scroll the clicked card to the center of the carousel
+  const scrollCardToCenter = (index: number) => {
+    const carousel = carouselRef.current;
+    if (!carousel) return;
+
+    const cardElement = carousel.querySelector<HTMLElement>(`[data-dream-card="${index}"]`);
+    if (cardElement) {
+      cardElement.scrollIntoView({ 
+        behavior: 'smooth', 
+        inline: 'center', 
+        block: 'nearest' 
+      });
+    }
+  };
 
   useEffect(() => {
     const carousel = carouselRef.current;
@@ -144,7 +169,10 @@ const DreamSelection: React.FC<DreamSelectionProps> = ({ theme, onBack, onDrink 
                         data={dream}
                         theme={theme}
                         index={index}
-                        onReveal={(wine) => setRevealedWine(wine)}
+                        onReveal={(wine) => {
+                          setRevealedWine(wine);
+                          scrollCardToCenter(index);
+                        }}
                       />
                 </div>
                 
